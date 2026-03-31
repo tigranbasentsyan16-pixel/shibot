@@ -1,3 +1,5 @@
+import os
+import json
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -6,23 +8,22 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive.readonly",
 ]
 
+# 🔐 Credentials from Railway Variables
+creds_dict = json.loads(os.getenv("GOOGLE_CREDENTIALS"))
+creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+
+client = gspread.authorize(creds)
+
 
 def clean_cell(value):
     return value.strip() if value else ""
 
 
 def get_schedule_for_group(group_number):
-    creds = Credentials.from_service_account_file(
-        "credentials.json",
-        scopes=SCOPES
-    )
-
-    client = gspread.authorize(creds)
-
     # 🔥 Բացում ենք spreadsheet-ը
     spreadsheet = client.open("Դասացուցակ 2025-2026 2-րդ կիսամյակ")
 
-    # ✅ ՃԻՇՏ SHEET (ամենակարևոր fix-ը)
+    # ✅ Sheet name
     sheet = spreadsheet.worksheet("դասացուցակ 2-րդ կիսամյակ")
 
     values = sheet.get_all_values()
@@ -32,11 +33,9 @@ def get_schedule_for_group(group_number):
         if not row:
             continue
 
-        # 🔥 մաքրում ենք group cell-ը
         group_cell = row[0].replace("\n", " ").strip()
 
         if group_cell.startswith(str(group_number)):
-
             schedule = {
                 "Երկուշաբթի": [
                     clean_cell(row[1]),
@@ -69,7 +68,6 @@ def get_schedule_for_group(group_number):
                     clean_cell(row[20]),
                 ],
             }
-
             return schedule
 
     return None
