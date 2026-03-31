@@ -1,3 +1,4 @@
+import os
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -9,7 +10,7 @@ from telegram.ext import (
 
 import datetime
 
-from os.getenv import BOT_TOKEN
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 from users import set_user_group, get_user_group
 from sheets import get_schedule_for_group
 from reminders import add_reminder, get_all_reminders
